@@ -1,12 +1,8 @@
-#include <iostream>
+#ifndef DisjointSet_H
+#define DisjointSet_H
 #include <vector>
-using namespace std;
-const int MAX_N = 1 << 20;
-int par[MAX_N], ran[MAX_N];
-int n, m, t;
-char c;
 
-class DisjointSet : vector<int>
+class DisjointSet : std::vector<int>
 {
   private:
     vector<int> rank;
@@ -51,28 +47,4 @@ class DisjointSet : vector<int>
     int getsetlen(int x) { return num[find(x)]; }
 };
 
-int main()
-{
-    cin >> n;
-    DisjointSet s(n);
-    for (int i = 0; i < n; i++)
-    {
-        cin >> c >> m >> t;
-        if (c == 'q')
-        {
-            if (s.same(m, t))
-                cout << "Yes\n";
-            else
-                cout << "No\n";
-        }
-        if (c == 'u')
-        {
-            s.merge(m, t);
-            cout << "Done!\n";
-        }
-        if (c == 'n')
-        {
-            cout << s.getsetlen(m) << ' ' << s.getsetlen(t) << endl;
-        }
-    }
-}
+#endif

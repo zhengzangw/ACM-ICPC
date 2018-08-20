@@ -1,9 +1,6 @@
-#include <iostream>
+#ifndef Hash_H
+#define Hash_H
 #include <cmath>
-#include <cstdio>
-#include <set>
-#include <map>
-#include <unordered_map>
 #define fabs(x) ((x) > 0 ? (x) : -(x))
 using namespace std;
 
@@ -91,26 +88,24 @@ class HashOA
 };
 HashOA H;
 
-
-int main()
-{
-    //Use set as Hash table
-    //Based on BST
+/********Use set as Hash table**********
+    Based on BST
     set<int> s;
     s.insert(1);
 
-    //Use map as Hash table (can store occur time)
-    //Based on BST O(lgn)
+
+/********Use map as Hash table (can store occur time)**********
+    Based on BST O(lgn)
     map<int,int> h;
     h[1] = 1;
     //中序遍历BST即可获得排好序的key列表
     //BST可以很容易地执行顺序统计，找出最接近的最小和最大元素
 
-    //Based on Hash table
+/********Based on Hash table *********
     unordered_map<int,int> Hash;
     Hash[1] = 1;
 
-    /********Some hashing method**********
+/********Some hashing method**********
     >Radix presentation
     >Sum
     >Sum of spuare
@@ -118,6 +113,6 @@ int main()
     >v[i]<<(i*3) xor
     >Multiplication*Prime
     >(PartialSum)^|&(PartialSum)
-    */
-    return 0;
-}
+*/
+
+#endif

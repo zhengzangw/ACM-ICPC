@@ -1,26 +1,7 @@
-#include <iostream>
-#include <algorithm>
+#ifndef BST_H
+#define BST_H
 #include <cmath>
-#include <cstdio>
-#include <string>
-#include <cstring>
-#include <map>
-#include <set>
-#include <vector>
-#include <queue>
-#include <stack>
-#include <iomanip>
-#include <cstdlib>
-#include <climits>
-//#include <unordered_map>
-typedef long long LL;
-typedef unsigned int UI;
-typedef unsigned long long ULL;
-const LL mod = 1000000007;
-#define MAXN 100
-#define eps 1e-10
-#define fabs ((x) > 0 ? (x) : -(x))
-#define random(x) (rand() % x)
+
 using namespace std;
 
 class BST{
@@ -183,23 +164,4 @@ public:
     }
 };
 
-int main()
-{
-    int n,k;
-    char op;
-    cin >> n;
-    BST bst;
-    for (int i=0;i<n;i++){
-        cin >> op >> k;
-        switch(op){
-            case 'A': bst.TREE_INSEART(k);
-            break;
-            case 'D': bst.TREE_DELETE(k);
-            break;
-        } 
-    }
-    bst.Inord_walk(); cout << endl;
-    bst.Preord_walk(); cout << endl;
-    bst.Postord_walk();
-    return 0;
-}
+#endif
