@@ -8,7 +8,7 @@ using namespace std;
 #define MAXV 0
 #define MAXE 0
 typedef int WTYPE;
-typedef pair<WTYPE, WTYPE> pTT;
+typedef pair<WTYPE, int> pTi;
 
 /**
  * Edge
@@ -20,6 +20,7 @@ struct Edge {
     bool operator<(const Edge &t) const { return w < t.w; }
 };
 Edge edge_set[MAXE];  // start index from 1
+int edge_head;
 
 /**
  * Adjacency Matrix
@@ -105,14 +106,14 @@ void merge(int x, int y) {
         DJS[x] = y;
         num[y] = num[x] + num[y];  // Attr alters
     } else {
-        DJS[y] = x;
+                DJS[y] = x;
         num[x] = num[y] + num[x];  // Attr alters
     }
     if (rnk[x] == rnk[y]) rnk[x]++;
 }
 
-void DJS_initial() {
-    for (int i = 0; i < MAXV; ++i) {
+void DJS_initial(int n) {
+    for (int i = 1; i <= n; ++i) {
         DJS[i] = num[i] = i;
         rnk[i] = 0;
     }
@@ -130,9 +131,9 @@ void DJS_initial() {
 WTYPE Kruskal(int n, int m) {
     WTYPE ret = 0;
     int cnt = 0;
-    DJS_initial();
-    sort(edge_set + 1, edge_set + n + 1);
-    for (int i = 1; i < m; ++i)
+    DJS_initial(n);
+    sort(edge_set + 1, edge_set + m + 1);
+    for (int i = 1; i <= m; ++i)
         if (!eq(edge_set[i].u, edge_set[i].v)) {
             cnt++;
             merge(edge_set[i].u, edge_set[i].v);
@@ -148,17 +149,20 @@ WTYPE Kruskal(int n, int m) {
 /**
  * Prim
  * @type Algorithm for minimal spinning tree
- * @param 1.adjacency list 2.adj_mtrx
+ * @param 1.adjacency list 2.adj_mtrx 3. Fibonacci Heap
  * @param n vertices number
  * @return weight of minimal spinning tree (-1 if not exist)
- * @timecomplex 1.O(Elog(V)) 2.O(V^2)
+ * @timecomplex 1.O(Elog(V)) 2.O(V^2) 3. O(E+VlgV)
  */
 WTYPE mincost[MAXV];
-priority_queue<pTT, vector<pTT>, greater<pTT> > q;
+priority_queue<pTi, vector<pTi>, greater<pTi> > q;
 bool vis[MAXV];
 WTYPE Prim(int n) {
     WTYPE ret = 0;
     int cnt = 0;
+    memset(mincost,0x3f,sizeof(WTYPE)*(n+1));
+    memset(vis,0,sizeof(bool)*(n+1));
+    while (!q.empty()) q.pop();     
     mincost[1] = 0;
     q.push(make_pair(0, 1));
 
@@ -183,6 +187,20 @@ WTYPE Prim(int n) {
     else
         return -1;
 }
+
+
+/**
+ * Miniaml Spanning Tree Related
+ * @type Algorithm List
+ * -Identify the uniqueness of MST
+ */
+
+/*Identify the uniqueness of MST
+1.Kruskal and mark the chosen edges
+2.Sort with second keyword that marked one are sorted behind
+3.Kruskal and mark the chosen edges with another mark
+4.Jugde whether marks of all edges are same respectively
+*/
 
 
 /**
@@ -306,8 +324,27 @@ void Topological_sort(int n){
  * @return new_dag Linked Forward List for new graph
  */
 
+priority_queue<pTi, vector<pTi>, greater<pTi> > Q;
+WTYPE dis[MAXV];
+//bool vis[MAXV];
+int Dijkstra(int S, int T){
+    while (!Q.empty()) Q.pop();
+    memset(dis, 0x3f, sizeof(dis));
+    memset(vis, 0, sizeof(vis));
+    Q.push(make_pair(0, S));
+    dis[S] = 0;
 
+    while (!Q.empty()){
+        pTi cur = Q.top();
+        Q.pop();
+        if (dis[cur.second] < cur.first) continue;
+        for (int i = head[cur.second]; i; i = adj_edge[i].pre)
+            if (dis[cur.second] + adj_edge[i].w < dis[adj_edge[i].v])
+                Q.push(make_pair(dis[adj_edge[i].v]=dis[cur.second]+adj_edge[i].w, adj_edge[i].v));
+    }
 
+    return dis[T];
+}
 
 
 #endif
