@@ -5,14 +5,17 @@
 #include "math.h"
 #include "matrix.h"
 using namespace std;
+
 #define MAXV 0
 #define MAXE 0
 typedef int WTYPE;
 typedef pair<WTYPE, int> pTi;
+typedef pair<int, int> Pii;
+int n,m;
+
 
 /**
- * Edge
- * @type Data Structure
+ * Edge Set
  */
 struct Edge {
     int u, v;
@@ -20,18 +23,18 @@ struct Edge {
     bool operator<(const Edge &t) const { return w < t.w; }
 };
 Edge edge_set[MAXE];  // start index from 1
-int edge_head;
+int edge_h;
+
 
 /**
  * Adjacency Matrix
- * @type Data Structure
  */
-WTYPE adj_mtrx[MAXV][MAXV];
+WTYPE adjmtrx[MAXV][MAXV];
 int deg[MAXV];
+
 
 /**
  * Adjacency List
- * @type Data Structure
  */
 struct Edgenode {
     int v;
@@ -48,8 +51,7 @@ struct Adjlist {
     int vtotal, etotal;
     Adjlist() : vtotal(0), etotal(0) {}
 } adj_list;
-// add u->v
-void add_edge_adjlist(int u, int v, WTYPE w) {
+void addedge_adjlist(int u, int v, WTYPE w) {
     Edgenode *p = new Edgenode;
     p->v = v;
     p->w = w;
@@ -59,30 +61,32 @@ void add_edge_adjlist(int u, int v, WTYPE w) {
     adj_list.etotal++;
 }
 
+
 /*
  * Linked Forward List
- * @type Data Structure
  */
 struct Adjedge {
     int v, pre;
     WTYPE w;
 };
-Adjedge adj_edge[2 * MAXE];
+Adjedge adjedge[2 * MAXE];
 int head[MAXV];
-int h_head(0);
+int head_h(0);
 // add u->v
-void add_edge(int u, int v, WTYPE w) {
-    adj_edge[++h_head].v = v;
-    adj_edge[h_head].w = w;
-    adj_edge[h_head].pre = head[u];
-    head[u] = h_head;
+void addedge(int u, int v, WTYPE w) {
+    adjedge[++head_h].v = v;
+    adjedge[head_h].w = w;
+    adjedge[head_h].pre = head[u];
+    head[u] = head_h;
 }
-#define tranverse_edge_of_u(i, x) \
-    for (int i = head[(x)]; i; i = adj_edge[i].pre)
+void init_adjedge(){
+    head_h = 0;
+    memset(adjedge,-1,sizeof(adjedge));
+}
+    
 
 /**
  * Disjoint Set
- * @type Data Structure
  */
 int rnk[MAXV];  // Merge with rank
 int DJS[MAXV];  // Disjoint set
@@ -119,6 +123,7 @@ void DJS_initial(int n) {
     }
 }
 
+
 /**
  * Kruskal
  * @type Algotithm for minimal spinning tree
@@ -145,6 +150,7 @@ WTYPE Kruskal(int n, int m) {
     else
         return -1;
 }
+
 
 /**
  * Prim
@@ -174,10 +180,10 @@ WTYPE Prim(int n) {
         cnt++;
         ret += w;
         vis[u] = true;
-        tranverse_edge_of_u(i, u) {
-            if (adj_edge[i].w < mincost[adj_edge[i].v]) {
-                mincost[adj_edge[i].v] = adj_edge[i].w;
-                q.push(make_pair(adj_edge[i].w, adj_edge[i].v));
+        for (int i = head[u]; i; i = adjedge[i].pre) {
+            if (adjedge[i].w < mincost[adjedge[i].v]) {
+                mincost[adjedge[i].v] = adjedge[i].w;
+                q.push(make_pair(adjedge[i].w, adjedge[i].v));
             }
         }
     }
@@ -225,7 +231,7 @@ int number_of_spinning_tree(int n) {
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
             if (i != j) {
-                C_mtrx[i][j] = -adj_mtrx[i][j];
+                C_mtrx[i][j] = -adjmtrx[i][j];
             } else {
                 C_mtrx[i][j] = deg[i];
             }
@@ -263,20 +269,19 @@ void DFS_visit(int u) {
     b[u] = dfs_time;
     ordL[u] = ord_time;
 
-    tranverse_edge_of_u(i,u){
-        if (vis[adj_edge[i].v]){
-            if (adj_edge[i].v!=u) is_dag = false;
+    for (int i = head[u]; i; i = adjedge[i].pre){
+        if (vis[adjedge[i].v]){
+            if (adjedge[i].v!=u) is_dag = false;
             continue; //if a tree is given, pre==u can be used
         }
-        simple_way[adj_edge[i].v] += simple_way[u];
-        DFS_vis[adj_edge[i].v] = u;
-        DFS_visit(adj_edge[i].v);
+        simple_way[adjedge[i].v] += simple_way[u];
+        DFS_vis[adjedge[i].v] = u;
+        DFS_visit(adjedge[i].v);
     }
 
     dfs_time++;
     f[u] = dfs_time;
     ordR[u] = ord_time;
-    
 }
 
 void DFS(int n){
@@ -317,20 +322,17 @@ void Topological_sort(int n){
 
 
 /**
- * Strongly Connected Component
- * @WTYPE Algorithm Tarjan, Kosaraju is deprecated
- * @param graph
- * @return scc strong connected component
- * @return new_dag Linked Forward List for new graph
+ * Dijkstra
+ * @type Algorithm for SSSP
+ * param S: source
+ * param T: destination
  */
 
 priority_queue<pTi, vector<pTi>, greater<pTi> > Q;
 WTYPE dis[MAXV];
-//bool vis[MAXV];
 int Dijkstra(int S, int T){
     while (!Q.empty()) Q.pop();
     memset(dis, 0x3f, sizeof(dis));
-    memset(vis, 0, sizeof(vis));
     Q.push(make_pair(0, S));
     dis[S] = 0;
 
@@ -338,12 +340,121 @@ int Dijkstra(int S, int T){
         pTi cur = Q.top();
         Q.pop();
         if (dis[cur.second] < cur.first) continue;
-        for (int i = head[cur.second]; i; i = adj_edge[i].pre)
-            if (dis[cur.second] + adj_edge[i].w < dis[adj_edge[i].v])
-                Q.push(make_pair(dis[adj_edge[i].v]=dis[cur.second]+adj_edge[i].w, adj_edge[i].v));
+        for (int i = head[cur.second]; i; i = adjedge[i].pre)
+            if (dis[cur.second] + adjedge[i].w < dis[adjedge[i].v])
+                Q.push(make_pair(dis[adjedge[i].v]=dis[cur.second]+adjedge[i].w, adjedge[i].v));
     }
 
     return dis[T];
+}
+
+
+/**Tarjan
+ * @type Algorithm on undigraph for BCC, cut-vertex and bridge
+ */
+
+int low[MAXV],dfn[MAXV],tindex;
+stack<int> S;
+
+int iscut[MAXV];
+pTi bridge[MAXE];
+int bridge_h,number_of_cut,number_of_bridge,number_of_bcc;
+int bccno[MAXV];
+// For bcc, the cut-vertice may not be in every bcc
+void tarjan_dfs(int cur, int pre) {
+    dfn[cur] = low[cur] = ++tindex;
+    int child = 0;
+    S.push(cur);
+    for (int i = head[cur]; i; i = adjedge[i].pre){
+        int v = adjedge[i].v;
+        if (!dfn[v]) {
+            tarjan_dfs(v, cur);
+            low[cur] = min(low[cur],low[v]);
+
+            child ++;
+            if (low[v]>=dfn[cur]){
+                if (!iscut[cur]) number_of_cut ++;
+                iscut[cur] ++;
+            }
+
+            if (low[v]>dfn[cur]){
+                number_of_bridge ++;
+                bridge[bridge_h].first = min(v,cur);
+                bridge[bridge_h++].second = max(v,cur);
+            }
+        } else if (dfn[v] < dfn[cur] && v!=pre) {
+            low[cur] = min(low[cur], dfn[v]);
+        }
+    }
+
+    if (low[cur] == dfn[cur]){
+        number_of_bcc++;
+        int v;
+        do{
+            bccno[v = S.top()] = number_of_bcc;
+            S.pop();
+        } while (v!=cur);
+    }
+
+    if (pre == -1) {
+        if (child == 1) {
+            number_of_cut--;
+            iscut[cur] = false;
+        } else {
+            iscut[cur] --;
+        }
+    }
+}
+
+void tarjan_undigraph(){
+    tindex = bridge_h = number_of_cut = number_of_bridge = 0;
+    for (int i=0;i<n;++i){
+        if (!dfn[i]){
+            tarjan_dfs(i, -1);
+        }
+    }
+}
+
+
+/** Tarjan SCC
+ * @type Algorithm on digraph for SCC
+ */
+int sccno[MAXV],scccnt[MAXV];
+int number_of_SCC;
+bool instack[MAXV];
+void SCC_dfs(int cur, int pre) {
+    dfn[cur] = low[cur] = ++tindex;
+    instack[cur] = true;
+    S.push(cur);
+    for (int i = head[cur]; i; i = adjedge[i].pre){
+        int v = adjedge[i].v;
+        if (!dfn[v]) {
+            tarjan_dfs(v, cur);
+            low[cur] = min(low[cur],low[v]);
+        } else if (instack[v]) {
+            low[cur] = min(low[cur],dfn[v]);
+        }
+    }
+
+    if (dfn[cur] == low[cur]){
+        number_of_SCC++;
+        int j;
+        do {
+            num[number_of_SCC] ++;
+            sccno[j = S.top()] = number_of_SCC;
+            S.pop();
+            instack[j] = false;
+        } while (j!=cur);
+    }
+}
+
+void tarjan_SCC(){
+    number_of_SCC = 0;
+    for (int i=1;i<=n;++i){
+        if (!dfn[i]){
+            SCC_dfs(i, -1);
+        }
+    }
 }
 
 
